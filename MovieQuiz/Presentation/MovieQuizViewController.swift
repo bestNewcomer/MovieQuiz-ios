@@ -48,13 +48,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         return questionStep
     }
     
-    // метод выводит данные вью модели на экран
-    private func show(quiz step: QuizStepViewModel) {
-        imageView.image = step.image
-        textLabel.text = step.question
-        counterLabel.text = step.questionNumber
-    }
-    
     // метод содержит логику перехода в один из сценариев
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questionsAmount - 1 {
@@ -93,28 +86,16 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         noButton.isEnabled = false
     }
     
-    // метод показывает результаты раунда квиза
-    func show(quiz result: QuizResultsViewModel) {
-        let alert = UIAlertController(
-            title: result.title,
-            message: result.text,
-            preferredStyle: .alert)
-        
-        let action = UIAlertAction(title: result.buttonText, style: .default) {[weak self] _ in
-            guard let self = self else {return}
-            self.currentQuestionIndex = 0
-            self.correctAnswers = 0
-            
-            questionFactory?.requestNextQuestion()
-        }
-            alert.addAction(action)
-            self.present(alert, animated: true, completion: nil)
-        
+    // метод выводит данные вью модели на экран
+    private func show(quiz step: QuizStepViewModel) {
+        imageView.image = step.image
+        textLabel.text = step.question
+        counterLabel.text = step.questionNumber
     }
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        // выводим информацию на экран для первого вопроса
         questionFactory = QuestionFactory(delegate: self)
         questionFactory?.requestNextQuestion()
     }
@@ -123,7 +104,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         guard let question = question else {
             return
         }
-        
         currentQuestion = question
         let viewModel = convert(model: question)
         DispatchQueue.main.async { [weak self] in
