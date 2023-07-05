@@ -16,6 +16,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     @IBOutlet private weak var yesButton: UIButton!
     
+    @IBOutlet private weak var imageView: UIImageView!
+    
+    @IBOutlet private weak var textLabel: UILabel!
+    
+    @IBOutlet private weak var counterLabel: UILabel!
+    
+// MARK: - Action
+    
     @IBAction private func noButtonClicked(_ sender: Any) {
         responseProcessing (answer:false)
     }
@@ -24,12 +32,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         responseProcessing (answer:true)
     }
     
-    @IBOutlet private weak var imageView: UIImageView!
-    
-    @IBOutlet private weak var textLabel: UILabel!
-    
-    @IBOutlet private weak var counterLabel: UILabel!
-    
+// MARK: - Private function
     // метод обрабатывает ответ
     private func responseProcessing (answer:Bool){
         guard let currentQuestion = currentQuestion else {
@@ -66,7 +69,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             show(quiz: viewModel)
         } else {
             currentQuestionIndex += 1
-            questionFactory?.requestNextQuestion() //может быть понадобиться добавть self
+            self.questionFactory?.requestNextQuestion()
             yesButton.isEnabled = true
             noButton.isEnabled = true
         }
@@ -102,6 +105,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         let action = UIAlertAction(title: result.buttonText, style: .default) {[weak self] _ in
             guard let self = self else {return}
+            
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
             
@@ -111,10 +115,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             self.present(alert, animated: true, completion: nil)
         
     }
-    // MARK: - Lifecycle
+// MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        // выводим информацию на экран для первого вопроса
+        
         questionFactory = QuestionFactory(delegate: self)
         questionFactory?.requestNextQuestion()
     }
@@ -123,7 +127,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         guard let question = question else {
             return
         }
-        
         currentQuestion = question
         let viewModel = convert(model: question)
         DispatchQueue.main.async { [weak self] in
