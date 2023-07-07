@@ -10,7 +10,7 @@ final class QuestionFactory: QuestionFactoryProtocol {
     
     func requestNextQuestion() {
         guard let index = (0..<questions.count).randomElement() else {
-            assertionFailure("вопрос отсутствует")
+            assertionFailure("Вопрос отсутствует")
             return
         }
         let question = questions[safe: index]

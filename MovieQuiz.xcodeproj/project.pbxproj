@@ -11,7 +11,6 @@
 		0E7954712A3CA799002142FC /* YS Display-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0E7954702A3CA799002142FC /* YS Display-Medium.ttf */; };
 		0ECBBC3A2A4EFF2900CABDDF /* QuestionFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECBBC392A4EFF2900CABDDF /* QuestionFactory.swift */; };
 		0ECBBC3D2A4F032100CABDDF /* QuizStepViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECBBC3C2A4F032100CABDDF /* QuizStepViewModel.swift */; };
-		0ECBBC3F2A4F033800CABDDF /* QuizResultsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECBBC3E2A4F033800CABDDF /* QuizResultsViewModel.swift */; };
 		0ECBBC412A4F034B00CABDDF /* QuizQuestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECBBC402A4F034B00CABDDF /* QuizQuestion.swift */; };
 		0ECBBC432A4F1F9900CABDDF /* Protocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECBBC422A4F1F9900CABDDF /* Protocol.swift */; };
 		0ECBBC4B2A55CDE200CABDDF /* GameRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECBBC4A2A55CDE200CABDDF /* GameRecord.swift */; };
@@ -34,7 +33,6 @@
 		0E7954702A3CA799002142FC /* YS Display-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "YS Display-Medium.ttf"; path = "MovieQuiz/Resources/Fonts/YS Display-Medium.ttf"; sourceTree = SOURCE_ROOT; };
 		0ECBBC392A4EFF2900CABDDF /* QuestionFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionFactory.swift; sourceTree = "<group>"; };
 		0ECBBC3C2A4F032100CABDDF /* QuizStepViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizStepViewModel.swift; sourceTree = "<group>"; };
-		0ECBBC3E2A4F033800CABDDF /* QuizResultsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizResultsViewModel.swift; sourceTree = "<group>"; };
 		0ECBBC402A4F034B00CABDDF /* QuizQuestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizQuestion.swift; sourceTree = "<group>"; };
 		0ECBBC422A4F1F9900CABDDF /* Protocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Protocol.swift; sourceTree = "<group>"; };
 		0ECBBC4A2A55CDE200CABDDF /* GameRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameRecord.swift; sourceTree = "<group>"; };
@@ -79,7 +77,6 @@
 			isa = PBXGroup;
 			children = (
 				0ECBBC3C2A4F032100CABDDF /* QuizStepViewModel.swift */,
-				0ECBBC3E2A4F033800CABDDF /* QuizResultsViewModel.swift */,
 				0ECBBC402A4F034B00CABDDF /* QuizQuestion.swift */,
 				0ECBBC4A2A55CDE200CABDDF /* GameRecord.swift */,
 				0ECBBC512A5726FE00CABDDF /* AlertModel.swift */,
@@ -243,7 +240,6 @@
 				0ECBBC3A2A4EFF2900CABDDF /* QuestionFactory.swift in Sources */,
 				AD77F5742857F8810062FB14 /* Date+Extensions.swift in Sources */,
 				AD1ABAB22831907B00B3E448 /* AppDelegate.swift in Sources */,
-				0ECBBC3F2A4F033800CABDDF /* QuizResultsViewModel.swift in Sources */,
 				AD1ABAB42831907B00B3E448 /* SceneDelegate.swift in Sources */,
 				0ECBBC522A5726FE00CABDDF /* AlertModel.swift in Sources */,
 				0ECBBC4D2A55D18D00CABDDF /* StatisticService.swift in Sources */,

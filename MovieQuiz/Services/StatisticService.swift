@@ -18,7 +18,7 @@ final class StatisticService: StatisticServiceProtocol {
     var bestGame: GameRecord? {
         get {
             guard let data = userDefaults.data(forKey: Keys.bestGame.rawValue),
-                let record = try? decoder.decode(GameRecord.self, from: data) else {
+                  let record = try? decoder.decode(GameRecord.self, from: data) else {
                 //assertionFailure("Ошибка")
                 return .init(correct: 0, total: 0, date: Date())
             }
@@ -77,7 +77,7 @@ final class StatisticService: StatisticServiceProtocol {
         
         let date = dateProvider()
         let currentBestGame = GameRecord(correct: correct, total: total, date: date)
-       
+        
         if let previosBestGame = bestGame {
             if currentBestGame > previosBestGame {
                 bestGame = currentBestGame

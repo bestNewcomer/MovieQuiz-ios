@@ -1,7 +1,8 @@
 import UIKit
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
-    
+   
+    // MARK: - Private properties
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
     private let questionsAmount: Int = 10
@@ -24,7 +25,17 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     @IBOutlet private weak var counterLabel: UILabel!
     
-// MARK: - Action
+    // MARK: - Lifecycle
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        questionFactory = QuestionFactory(delegate: self)
+        alertPresenter = AlertPresenter(viwController: self)
+        statisticService = StatisticService()
+        questionFactory?.requestNextQuestion()
+    }
+    
+    // MARK: - Action
     
     @IBAction private func noButtonClicked(_ sender: Any) {
         responseProcessing (answer:false)
@@ -34,7 +45,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         responseProcessing (answer:true)
     }
     
-// MARK: - Private function
+    // MARK: - Private function
     // метод обрабатывает ответ
     private func responseProcessing (answer:Bool){
         guard let currentQuestion = currentQuestion else {
@@ -80,13 +91,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             message: makeResultMessage(),
             buttonText: "Сыграть ещё раз",
             buttonAction: {[weak self] in
-                guard let self = self else {return}
-                self.currentQuestionIndex = 0
-                self.correctAnswers = 0
-                self.questionFactory?.requestNextQuestion()
+                self?.currentQuestionIndex = 0
+                self?.correctAnswers = 0
+                self?.questionFactory?.requestNextQuestion()
             }
         )
         alertPresenter?.show(alertModel: alertModel)
+        yesButton.isEnabled = true
+        noButton.isEnabled = true
     }
     
     // метод выводит сообщение со статистикой
@@ -96,13 +108,13 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             assertionFailure("Ошибка")
             return ""
         }
-        """
+        let resultMessage = """
         Количество сыгранных квизов: \(statisticService.gamesCount)
-        Ваш результат: \(correctAnswers)\\\(questionsAmount)
-        Рекорд: \(bestGame.correct)\\\(bestGame.total)
+        Ваш результат: \(correctAnswers)/\(questionsAmount)
+        Рекорд: \(bestGame.correct)/\(bestGame.total)
         Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
         """
-        let resultMessage = ["Количество сыгранных квизов: \(statisticService.gamesCount)", "Ваш результат: \(correctAnswers)\\\(questionsAmount)", "Рекорд: \(bestGame.correct)\\\(bestGame.total)", "Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"].joined(separator: "/n")
+        
         return resultMessage
     }
     // метод меняет цвет рамки
@@ -127,16 +139,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         noButton.isEnabled = false
     }
     
-// MARK: - Lifecycle
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    
-        questionFactory = QuestionFactory(delegate: self)
-        alertPresenter = AlertPresenter(viwController: self)
-        statisticService = StatisticService()
-        
-        questionFactory?.requestNextQuestion()
-    }
     // MARK: - QuestionFactoryDelegate
     func didReceiveNextQuestion(question: QuizQuestion?) {
         guard let question = question else {
@@ -145,8 +147,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         currentQuestion = question
         let viewModel = convert(model: question)
         DispatchQueue.main.async { [weak self] in
-               self?.show(quiz: viewModel)
+            self?.show(quiz: viewModel)
         }
     }
 }
+
 

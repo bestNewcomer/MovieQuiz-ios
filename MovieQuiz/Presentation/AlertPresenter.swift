@@ -20,6 +20,6 @@ final class AlertPresenter: AlertPresenterProtocol {
         }
         alert.addAction(action)
         
-        viwController?.present(alert, animated: true)
+        viwController?.present(alert, animated: true, completion: nil)
     }
 }
