@@ -15,19 +15,21 @@ final class StatisticService: StatisticServiceProtocol {
         }
     }
     
-    var bestGame: BestGame? {
+    var bestGame: GameRecord? {
         get {
-            guard
-                let data = userDefaults.data(forKey: Keys.bestGame.rawValue),
-                let bestGame = try? decoder.decode(BestGame.self, from: data) else {
-                assertionFailure("Ошибка")
-                return nil
+            guard let data = userDefaults.data(forKey: Keys.bestGame.rawValue),
+                let record = try? decoder.decode(GameRecord.self, from: data) else {
+                //assertionFailure("Ошибка")
+                return .init(correct: 0, total: 0, date: Date())
             }
-            return bestGame
+            return record
         }
         set {
-            let data = try? encoder.encode(newValue)
-            userDefaults.set(newValue, forKey: Keys.bestGame.rawValue)
+            guard let data = try? encoder.encode(newValue) else {
+                assertionFailure("Невозможно сохранить результат")
+                return
+            }
+            userDefaults.set(data, forKey: Keys.bestGame.rawValue)
         }
     }
     
@@ -54,13 +56,13 @@ final class StatisticService: StatisticServiceProtocol {
     private let userDefaults: UserDefaults
     private let decoder:JSONDecoder
     private let encoder:JSONEncoder
-    private let dateProvider:() -> Data
+    private let dateProvider:() -> Date
     
     init (
         userDefaults: UserDefaults = .standard,
         decoder:JSONDecoder = JSONDecoder(),
         encoder:JSONEncoder = JSONEncoder(),
-        dateProvider: @escaping () -> Data = { Data() }
+        dateProvider: @escaping () -> Date = { Date() }
     ) {
         self.userDefaults = userDefaults
         self.decoder = decoder
@@ -74,7 +76,7 @@ final class StatisticService: StatisticServiceProtocol {
         self.gamesCount += 1
         
         let date = dateProvider()
-        let currentBestGame = BestGame(correct: correct, total: total, date: date)
+        let currentBestGame = GameRecord(correct: correct, total: total, date: date)
        
         if let previosBestGame = bestGame {
             if currentBestGame > previosBestGame {

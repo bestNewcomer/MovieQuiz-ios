@@ -7,6 +7,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
+    private var alertPresenter: AlertPresenterProtocol?
+    private var statisticService: StatisticServiceProtocol?
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
@@ -61,22 +63,50 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // метод содержит логику перехода в один из сценариев
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questionsAmount - 1 {
-            let text = "Ваш результат: \(correctAnswers)/10"
-            let viewModel = QuizResultsViewModel(
-                title: "Этот раунд окончен!",
-                text: text,
-                buttonText: "Сыграть ещё раз")
-            show(quiz: viewModel)
+            showFinalResults()
         } else {
             currentQuestionIndex += 1
-            self.questionFactory?.requestNextQuestion()
+            questionFactory?.requestNextQuestion()
             yesButton.isEnabled = true
             noButton.isEnabled = true
         }
     }
+    // метод показывает финальную статистику
+    private func showFinalResults () {
+        statisticService?.store(correct: correctAnswers, total: questionsAmount)
+        
+        let alertModel = AlertModel(
+            title: "Этот раунд окончен!",
+            message: makeResultMessage(),
+            buttonText: "Сыграть ещё раз",
+            buttonAction: {[weak self] in
+                guard let self = self else {return}
+                self.currentQuestionIndex = 0
+                self.correctAnswers = 0
+                self.questionFactory?.requestNextQuestion()
+            }
+        )
+        alertPresenter?.show(alertModel: alertModel)
+    }
     
+    // метод выводит сообщение со статистикой
+    private func makeResultMessage () -> String {
+        
+        guard let statisticService = statisticService, let bestGame = statisticService.bestGame else {
+            assertionFailure("Ошибка")
+            return ""
+        }
+        """
+        Количество сыгранных квизов: \(statisticService.gamesCount)
+        Ваш результат: \(correctAnswers)\\\(questionsAmount)
+        Рекорд: \(bestGame.correct)\\\(bestGame.total)
+        Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
+        """
+        let resultMessage = ["Количество сыгранных квизов: \(statisticService.gamesCount)", "Ваш результат: \(correctAnswers)\\\(questionsAmount)", "Рекорд: \(bestGame.correct)\\\(bestGame.total)", "Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"].joined(separator: "/n")
+        return resultMessage
+    }
     // метод меняет цвет рамки
-    func showAnswerResult(isCorrect: Bool) {
+    private func showAnswerResult(isCorrect: Bool) {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
         imageView.layer.cornerRadius = 20
@@ -86,9 +116,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         } else {
             imageView.layer.borderColor = UIColor.ypRed.cgColor
         }
-        // запускаем задачу через 1 секунду c помощью диспетчера задач
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+        // запускаем задачу через 0.5 секунду c помощью диспетчера задач
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             guard let self = self else {return}
+            
             self.imageView.layer.borderColor = UIColor.clear.cgColor
             self.showNextQuestionOrResults()
         }
@@ -96,30 +127,14 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         noButton.isEnabled = false
     }
     
-    // метод показывает результаты раунда квиза
-    func show(quiz result: QuizResultsViewModel) {
-        let alert = UIAlertController(
-            title: result.title,
-            message: result.text,
-            preferredStyle: .alert)
-        
-        let action = UIAlertAction(title: result.buttonText, style: .default) {[weak self] _ in
-            guard let self = self else {return}
-            
-            self.currentQuestionIndex = 0
-            self.correctAnswers = 0
-            
-            questionFactory?.requestNextQuestion()
-        }
-            alert.addAction(action)
-            self.present(alert, animated: true, completion: nil)
-        
-    }
 // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+    
         questionFactory = QuestionFactory(delegate: self)
+        alertPresenter = AlertPresenter(viwController: self)
+        statisticService = StatisticService()
+        
         questionFactory?.requestNextQuestion()
     }
     // MARK: - QuestionFactoryDelegate
