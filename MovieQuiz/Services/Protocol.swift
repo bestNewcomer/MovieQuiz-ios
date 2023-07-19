@@ -2,10 +2,13 @@ import Foundation
 
 protocol QuestionFactoryProtocol {
     func requestNextQuestion()
+    func loadData()
 }
 
 protocol QuestionFactoryDelegate: AnyObject {
     func didReceiveNextQuestion(question: QuizQuestion?)
+    func didLoadDataFromServer()
+    func didFailToLoadData(with error: Error)
 }
 
 protocol StatisticServiceProtocol {
@@ -18,4 +21,8 @@ protocol StatisticServiceProtocol {
 
 protocol AlertPresenterProtocol {
     func show(alertModel: AlertModel)
+}
+
+protocol MoviesLoading {
+    func loadMovies(handler: @escaping (Result<MostPopularMovies, Error>) -> Void)
 }
