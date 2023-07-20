@@ -9,6 +9,7 @@ final class QuestionFactory: QuestionFactoryProtocol {
         self.moviesLoader = moviesLoader
         self.delegate = delegate
     }
+    
     // метод получает следующий вопрос
     func requestNextQuestion() {
         DispatchQueue.global().async { [weak self] in

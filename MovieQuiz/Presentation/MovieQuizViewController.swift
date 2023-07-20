@@ -1,11 +1,7 @@
 import UIKit
 
-final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, MoviesLoading {
-    func loadMovies(handler: @escaping (Result<MostPopularMovies, Error>) -> Void) {
-        <#code#>
-    }
+final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
-   
     // MARK: - Private properties
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
@@ -35,7 +31,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        questionFactory = QuestionFactory(moviesLoader: self, delegate: self)
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         alertPresenter = AlertPresenter(viwController: self)
         statisticService = StatisticService()
         questionFactory?.requestNextQuestion()
@@ -55,7 +51,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
     
     // MARK: - Private function
     
-    // метод показывает индикатор загрузки
+    // метод показывает/убирает индикатор загрузки
     private func loadingIndicator(isHidden: Bool) {
         if isHidden == false {
             activityIndicator.isHidden = false
@@ -151,7 +147,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
             }
         )
         alertPresenter?.show(alertModel: errorModel)
-        // создайте и покажите алерт
     }
     
     // метод меняет цвет рамки
@@ -165,7 +160,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         } else {
             imageView.layer.borderColor = UIColor.ypRed.cgColor
         }
-        // запускаем задачу через 0.5 секунду c помощью диспетчера задач
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             guard let self = self else {return}
             
@@ -199,5 +193,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate, 
         showNetworkError(message: error.localizedDescription)
     }
 }
+
 
 
