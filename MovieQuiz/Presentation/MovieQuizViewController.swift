@@ -10,35 +10,32 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var currentQuestion: QuizQuestion?
     private var alertPresenter: AlertPresenterProtocol?
     private var statisticService: StatisticServiceProtocol?
-    private var isHidden: Bool
-    override var preferredStatusBarStyle: UIStatusBarStyle {
-        return .lightContent
-    }
     
+    // MARK: - IBOutlet
     @IBOutlet private weak var noButton: UIButton!
-    
     @IBOutlet private weak var yesButton: UIButton!
-    
     @IBOutlet private weak var imageView: UIImageView!
-    
     @IBOutlet private weak var textLabel: UILabel!
-    
     @IBOutlet private weak var counterLabel: UILabel!
-    
     @IBOutlet private var activityIndicator: UIActivityIndicatorView!
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        imageView.layer.cornerRadius = 20
+        
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         alertPresenter = AlertPresenter(viwController: self)
         statisticService = StatisticService()
         questionFactory?.requestNextQuestion()
-        loadingIndicator(isHidden: isHidden == false)
+        loadingIndicator(isHidden: false)
         questionFactory?.loadData()
     }
     
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
     // MARK: - Action
     
     @IBAction private func noButtonClicked(_ sender: Any) {
@@ -53,7 +50,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // метод показывает/убирает индикатор загрузки
     private func loadingIndicator(isHidden: Bool) {
-        if isHidden == false {
+        if  isHidden == false {
             activityIndicator.isHidden = false
             activityIndicator.startAnimating()
         } else {
@@ -135,7 +132,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     //метод выводит сообщение о ошибке
     private func showNetworkError(message: String) {
-        loadingIndicator(isHidden: isHidden == true)
+        loadingIndicator(isHidden: true)
         let errorModel = AlertModel(
             title: "Ошибка!",
             message: message,
@@ -153,7 +150,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private func showAnswerResult(isCorrect: Bool) {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
-        imageView.layer.cornerRadius = 20
+        //imageView.layer.cornerRadius = 20
         if isCorrect == true {
             imageView.layer.borderColor = UIColor.ypGreen.cgColor
             correctAnswers+=1

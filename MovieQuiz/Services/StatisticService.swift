@@ -5,7 +5,6 @@ final class StatisticService: StatisticServiceProtocol {
     var totalAccuracy: Double {
         Double(correct) / Double(total) * 100
     }
-    
     var gamesCount: Int {
         get {
             userDefaults.integer(forKey: Keys.gamesCount.rawValue)
@@ -19,7 +18,6 @@ final class StatisticService: StatisticServiceProtocol {
         get {
             guard let data = userDefaults.data(forKey: Keys.bestGame.rawValue),
                   let record = try? decoder.decode(GameRecord.self, from: data) else {
-                //assertionFailure("Ошибка")
                 return .init(correct: 0, total: 0, date: Date())
             }
             return record
@@ -69,7 +67,7 @@ final class StatisticService: StatisticServiceProtocol {
         self.encoder = encoder
         self.dateProvider = dateProvider
     }
-    
+    // сохраняющий результаты игры
     func store(correct: Int, total: Int) {
         self.correct += correct
         self.total += total

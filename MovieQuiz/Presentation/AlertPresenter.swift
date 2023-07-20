@@ -8,7 +8,7 @@ final class AlertPresenter: AlertPresenterProtocol {
     init(viwController: UIViewController? = nil) {
         self.viwController = viwController
     }
-    
+    // метод отображает алерт
     func show(alertModel: AlertModel) {
         let alert = UIAlertController(
             title: alertModel.title,
