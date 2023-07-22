@@ -1,7 +1,7 @@
 import UIKit
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
-   
+    
     // MARK: - Private properties
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
@@ -11,30 +11,31 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private var alertPresenter: AlertPresenterProtocol?
     private var statisticService: StatisticServiceProtocol?
     
-    override var preferredStatusBarStyle: UIStatusBarStyle {
-        return .lightContent
-    }
-    
+    // MARK: - IBOutlet
     @IBOutlet private weak var noButton: UIButton!
-    
     @IBOutlet private weak var yesButton: UIButton!
-    
     @IBOutlet private weak var imageView: UIImageView!
-    
     @IBOutlet private weak var textLabel: UILabel!
-    
     @IBOutlet private weak var counterLabel: UILabel!
+    @IBOutlet private var activityIndicator: UIActivityIndicatorView!
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        questionFactory = QuestionFactory(delegate: self)
+        imageView.layer.cornerRadius = 20
+        
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         alertPresenter = AlertPresenter(viwController: self)
         statisticService = StatisticService()
         questionFactory?.requestNextQuestion()
+        loadingIndicator(isHidden: false)
+        questionFactory?.loadData()
     }
     
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
     // MARK: - Action
     
     @IBAction private func noButtonClicked(_ sender: Any) {
@@ -46,6 +47,18 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
     
     // MARK: - Private function
+    
+    // метод показывает/убирает индикатор загрузки
+    private func loadingIndicator(isHidden: Bool) {
+        if  isHidden == false {
+            activityIndicator.isHidden = false
+            activityIndicator.startAnimating()
+        } else {
+            activityIndicator.isHidden = true
+            activityIndicator.stopAnimating()
+        }
+    }
+    
     // метод обрабатывает ответ
     private func responseProcessing (answer:Bool){
         guard let currentQuestion = currentQuestion else {
@@ -57,11 +70,10 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // метод конвертирует моковые данные во вью модель
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        let questionStep = QuizStepViewModel (
-            image: UIImage(named: model.image) ?? UIImage(),
+        return QuizStepViewModel (
+            image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
             questionNumber: "\(currentQuestionIndex+1)/\(questionsAmount)")
-        return questionStep
     }
     
     // метод выводит данные вью модели на экран
@@ -117,18 +129,34 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         
         return resultMessage
     }
+    
+    //метод выводит сообщение о ошибке
+    private func showNetworkError(message: String) {
+        loadingIndicator(isHidden: true)
+        let errorModel = AlertModel(
+            title: "Ошибка!",
+            message: message,
+            buttonText: "Попробовать ещё раз",
+            buttonAction: {[weak self] in
+                self?.currentQuestionIndex = 0
+                self?.correctAnswers = 0
+                self?.questionFactory?.requestNextQuestion()
+            }
+        )
+        alertPresenter?.show(alertModel: errorModel)
+    }
+    
     // метод меняет цвет рамки
     private func showAnswerResult(isCorrect: Bool) {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
-        imageView.layer.cornerRadius = 20
+        //imageView.layer.cornerRadius = 20
         if isCorrect == true {
             imageView.layer.borderColor = UIColor.ypGreen.cgColor
             correctAnswers+=1
         } else {
             imageView.layer.borderColor = UIColor.ypRed.cgColor
         }
-        // запускаем задачу через 0.5 секунду c помощью диспетчера задач
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             guard let self = self else {return}
             
@@ -150,6 +178,18 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             self?.show(quiz: viewModel)
         }
     }
+    
+    // метод сообщает об успешной загрузки данных
+    func didLoadDataFromServer() {
+        activityIndicator.isHidden = true
+        questionFactory?.requestNextQuestion()
+    }
+    
+    // метод сообщает об ошибке загрузки данных
+    func didFailToLoadData(with error: Error) {
+        showNetworkError(message: error.localizedDescription)
+    }
 }
+
 
 
