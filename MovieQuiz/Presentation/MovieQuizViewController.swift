@@ -24,12 +24,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         super.viewDidLoad()
         
         imageView.layer.cornerRadius = 20
-        
+        loadingIndicator()
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         alertPresenter = AlertPresenter(viwController: self)
         statisticService = StatisticService()
         questionFactory?.requestNextQuestion()
-        loadingIndicator(isHidden: false)
         questionFactory?.loadData()
     }
     
@@ -49,14 +48,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Private function
     
     // метод показывает/убирает индикатор загрузки
-    private func loadingIndicator(isHidden: Bool) {
-        if  isHidden == false {
-            activityIndicator.isHidden = false
+    private func loadingIndicator() {
+            activityIndicator.hidesWhenStopped = true
             activityIndicator.startAnimating()
-        } else {
-            activityIndicator.isHidden = true
-            activityIndicator.stopAnimating()
-        }
     }
     
     // метод обрабатывает ответ
@@ -130,9 +124,9 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         return resultMessage
     }
     
-    //метод выводит сообщение о ошибке
+    //метод выводит сообщение о ошибке загрузки данных с сервера
     private func showNetworkError(message: String) {
-        loadingIndicator(isHidden: true)
+//        loadingIndicator(isHidden: true)
         let errorModel = AlertModel(
             title: "Ошибка!",
             message: message,
@@ -150,8 +144,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private func showAnswerResult(isCorrect: Bool) {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
-        //imageView.layer.cornerRadius = 20
-        if isCorrect == true {
+        if isCorrect {
             imageView.layer.borderColor = UIColor.ypGreen.cgColor
             correctAnswers+=1
         } else {
@@ -169,6 +162,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // MARK: - QuestionFactoryDelegate
     func didReceiveNextQuestion(question: QuizQuestion?) {
+        activityIndicator.stopAnimating()
         guard let question = question else {
             return
         }
@@ -181,7 +175,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     
     // метод сообщает об успешной загрузки данных
     func didLoadDataFromServer() {
-        activityIndicator.isHidden = true
         questionFactory?.requestNextQuestion()
     }
     
