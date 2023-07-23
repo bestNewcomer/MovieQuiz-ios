@@ -5,9 +5,11 @@ final class MovieQuizPresenter {
     
     private var currentQuestionIndex = 0
     let questionsAmount: Int = 10
+    var correctAnswers = 0
     
     var currentQuestion: QuizQuestion?
     weak var viewController: MovieQuizViewController?
+    var questionFactory: QuestionFactoryProtocol?
     
     // метод проверяет последний ли это вопрос квиза
     func isLastQuestion() -> Bool {
@@ -41,4 +43,27 @@ final class MovieQuizPresenter {
         viewController?.showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        viewController?.activityIndicator.stopAnimating()
+        guard let question = question else {
+            return
+        }
+        currentQuestion = question
+        let viewModel = convert(model: question)
+        DispatchQueue.main.async { [weak self] in
+            self?.viewController?.show(quiz: viewModel)
+        }
+    }
+    
+    // метод содержит логику перехода в один из сценариев
+    func showNextQuestionOrResults() {
+        if self.isLastQuestion() {
+            viewController?.showFinalResults()
+        } else {
+            self.switchToNextQuestion()
+            questionFactory?.requestNextQuestion()
+        }
+        viewController?.yesButton.isEnabled = true
+        viewController?.noButton.isEnabled = true
+    }
 }
