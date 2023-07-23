@@ -6,7 +6,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private let presenter = MovieQuizPresenter()
     private var correctAnswers = 0
     private var questionFactory: QuestionFactoryProtocol?
-    private var currentQuestion: QuizQuestion?
     private var alertPresenter: AlertPresenterProtocol?
     private var statisticService: StatisticServiceProtocol?
     
@@ -22,6 +21,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        presenter.viewController = self
         imageView.layer.cornerRadius = 20
         loadingIndicator()
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
@@ -37,11 +37,11 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Action
     
     @IBAction private func noButtonClicked(_ sender: Any) {
-        responseProcessing (answer:false)
+        presenter.responseProcessing (answer:false)
     }
     
     @IBAction private func yesButtonClicked(_ sender: Any) {
-        responseProcessing (answer:true)
+        presenter.responseProcessing (answer:true)
     }
     
     // MARK: - Private function
@@ -52,50 +52,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
             activityIndicator.startAnimating()
     }
     
-    // метод обрабатывает ответ
-    private func responseProcessing (answer:Bool){
-        guard let currentQuestion = currentQuestion else {
-            return
-        }
-        let givenAnswer:Bool = answer
-        showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
-    }
-    
+
     // метод выводит данные вью модели на экран
     private func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
-    }
-    
-    // метод содержит логику перехода в один из сценариев
-    private func showNextQuestionOrResults() {
-        if presenter.isLastQuestion() {
-            showFinalResults()
-        } else {
-            presenter.switchToNextQuestion()
-            questionFactory?.requestNextQuestion()
-            yesButton.isEnabled = true
-            noButton.isEnabled = true
-        }
-    }
-    // метод показывает финальную статистику
-    private func showFinalResults () {
-        statisticService?.store(correct: correctAnswers, total: presenter.questionsAmount)
-        
-        let alertModel = AlertModel(
-            title: "Этот раунд окончен!",
-            message: makeResultMessage(),
-            buttonText: "Сыграть ещё раз",
-            buttonAction: {[weak self] in
-                self?.presenter.resetQuestionIndex()
-                self?.correctAnswers = 0
-                self?.questionFactory?.requestNextQuestion()
-            }
-        )
-        alertPresenter?.show(alertModel: alertModel)
-        yesButton.isEnabled = true
-        noButton.isEnabled = true
     }
     
     // метод выводит сообщение со статистикой
@@ -115,24 +77,27 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         return resultMessage
     }
     
-    //метод выводит сообщение о ошибке загрузки данных с сервера
-    private func showNetworkError(message: String) {
-//        loadingIndicator(isHidden: true)
-        let errorModel = AlertModel(
-            title: "Ошибка!",
-            message: message,
-            buttonText: "Попробовать ещё раз",
+    // метод показывает финальную статистику
+    private func showFinalResults () {
+        statisticService?.store(correct: correctAnswers, total: presenter.questionsAmount)
+        
+        let alertModel = AlertModel(
+            title: "Этот раунд окончен!",
+            message: makeResultMessage(),
+            buttonText: "Сыграть ещё раз",
             buttonAction: {[weak self] in
                 self?.presenter.resetQuestionIndex()
                 self?.correctAnswers = 0
                 self?.questionFactory?.requestNextQuestion()
             }
         )
-        alertPresenter?.show(alertModel: errorModel)
+        alertPresenter?.show(alertModel: alertModel)
+        yesButton.isEnabled = true
+        noButton.isEnabled = true
     }
     
     // метод меняет цвет рамки
-    private func showAnswerResult(isCorrect: Bool) {
+    func showAnswerResult(isCorrect: Bool) {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
         if isCorrect {
@@ -151,13 +116,41 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         noButton.isEnabled = false
     }
     
+    // метод содержит логику перехода в один из сценариев
+    private func showNextQuestionOrResults() {
+        if presenter.isLastQuestion() {
+            showFinalResults()
+        } else {
+            presenter.switchToNextQuestion()
+            questionFactory?.requestNextQuestion()
+            yesButton.isEnabled = true
+            noButton.isEnabled = true
+        }
+    }
+    
+    //метод выводит сообщение о ошибке загрузки данных с сервера
+    private func showNetworkError(message: String) {
+        activityIndicator.startAnimating()
+        let errorModel = AlertModel(
+            title: "Ошибка!",
+            message: message,
+            buttonText: "Попробовать ещё раз",
+            buttonAction: {[weak self] in
+                self?.presenter.resetQuestionIndex()
+                self?.correctAnswers = 0
+                self?.questionFactory?.requestNextQuestion()
+            }
+        )
+        alertPresenter?.show(alertModel: errorModel)
+    }
+    
     // MARK: - QuestionFactoryDelegate
     func didReceiveNextQuestion(question: QuizQuestion?) {
         activityIndicator.stopAnimating()
         guard let question = question else {
             return
         }
-        currentQuestion = question
+        presenter.currentQuestion = question
         let viewModel = presenter.convert(model: question)
         DispatchQueue.main.async { [weak self] in
             self?.show(quiz: viewModel)
