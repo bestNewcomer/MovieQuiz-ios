@@ -71,7 +71,7 @@ final class MovieQuizViewController: UIViewController {
         alertPresenter?.show(alertModel: errorModel)
     }
     
-    // метод показывает финальную статистику
+    // метод выводит финальную статистику
     func showFinalResults () {
         yesButton.isEnabled = true
         noButton.isEnabled = true

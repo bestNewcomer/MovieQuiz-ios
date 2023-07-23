@@ -22,8 +22,17 @@ final class QuestionFactory: QuestionFactoryProtocol {
                 print("Ошибка загрузки изображения")
             }
             let rating = Float(movie.rating) ?? 0
-            let text = "Рейтинг этого фильма больше чем 7?"
-            let correctAnswer = rating > 7
+            let ratingQuestion = round(Float.random(in: 7.1...9.5)*10)/10
+            let text: String
+            let correctAnswer: Bool
+            let mainQuestion = Int.random(in: 0...10)
+            if mainQuestion % 2 == 0 {
+                text = "Рейтинг этого фильма больше чем \(ratingQuestion)?"
+                correctAnswer = rating > ratingQuestion
+            } else {
+                text = "Рейтинг этого фильма меньше чем \(ratingQuestion)?"
+                correctAnswer = rating < ratingQuestion
+            }
             let question = QuizQuestion(image: imageData,
                                         text: text,
                                         correctAnswer: correctAnswer)
@@ -41,7 +50,7 @@ final class QuestionFactory: QuestionFactoryProtocol {
                 guard let self = self else { return }
                 switch result {
                 case .success(let mostPopularMovies):
-                    self.movies = mostPopularMovies.items
+                    self.movies = mostPopularMovies.items.shuffled()
                     self.delegate?.didLoadDataFromServer()
                 case .failure(let error):
                     self.delegate?.didFailToLoadData(with: error)
