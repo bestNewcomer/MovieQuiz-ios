@@ -5,14 +5,14 @@ final class MovieQuizPresenter: QuestionFactoryDelegate {
     
     // MARK: - Private properties
     private var currentQuestionIndex = 0
-    private weak var viewController: MovieQuizViewController?
+    private weak var viewController: MovieQuizViewControllerProtocol?
     private var questionFactory: QuestionFactoryProtocol?
     private var statisticService: StatisticServiceProtocol?
     private var currentQuestion: QuizQuestion?
     private let questionsAmount: Int = 10
     private var correctAnswers = 0
     
-    init (viewController: MovieQuizViewController) {
+    init (viewController: MovieQuizViewControllerProtocol) {
         self.viewController = viewController
         
         questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
